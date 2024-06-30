@@ -11,7 +11,8 @@ const Link = () => {
 
 
     const fetchSongData = async () => {
-        const response = await axios.get(`https://saavn.dev/api/songs?link=${link}`);
+        const formattedUrl = transformUrl(link);        
+        const response = await axios.get(`https://saavn.dev/api/songs?link=${formattedUrl}`);
         setSongData(response.data.data[0])
         setLink("");
     }
@@ -28,8 +29,31 @@ const Link = () => {
         }
     };
     const enterToSearch = (e) => {
-        if(e.code === "Enter") {
+        if (e.code === "Enter") {
             fetchSongData();
+        }
+    }
+
+    function transformUrl(url) {
+        // Regular expression to match the desired format
+        const desiredFormatRegex = /^https:\/\/www\.jiosaavn\.com\/song\/[^\/]+\/[^\/]+$/;
+
+        // If the URL is already in the desired format, return it as is
+        if (desiredFormatRegex.test(url)) {
+            return url;
+        }
+
+        // Extract song name and song ID from the given URL
+        const regex = /\/([^\/]+)\/([^\/]+)$/;
+        const match = url.match(regex);
+
+        if (match) {
+            const songName = match[1];
+            const songId = match[2];
+            return `https://www.jiosaavn.com/song/${songName}/${songId}`;
+        } else {
+            console.error("No match found");
+            return null;
         }
     }
 
@@ -62,7 +86,7 @@ const Link = () => {
                 </div>
             </div>
             <div className="h-1">
-                {isLoading && 
+                {isLoading &&
                     <div className="font-semibold text-red-500">
                         waiiting for response...
                     </div>
